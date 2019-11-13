@@ -1,0 +1,5 @@
+## Interface: 11302
+## Title: RaidToCSV
+## Author: VictoriousArugal
+## Version: 1.0
+main.lua
