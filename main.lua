@@ -1,14 +1,10 @@
-function raid_to_csv(classes, delimeter1, delimeter2)
-  csv = "";
+function raid_to_csv(headers, delimeter1, delimeter2)
+  csv = headers;
   total_members = 0;
   for i=1,GetNumGroupMembers() do
     total_members = total_members + 1;
     name,a,a,a,class,a,a,a,a,a=GetRaidRosterInfo(i);
-    if classes==true then
-      csv = csv .. name .. delimeter2 .. class .. delimeter1;
-    else
-      csv = csv .. name .. delimeter1
-    end
+    csv = csv .. delimeter1 .. name .. delimeter2 .. class;
   end
   return csv, total_members;
 end
@@ -28,15 +24,16 @@ function class_composition(CHAT_LOCATION)
   for i=1,GetNumGroupMembers() do
     total_members = total_members + 1;
     name,a,a,a,class,a,a,a,a,a=GetRaidRosterInfo(i);
-    if class=="Priest" then priests=priests+1 end
-    if class=="Mage" then mages=mages+1 end
-    if class=="Warlock" then warlocks=warlocks+1 end
-    if class=="Druid" then druids=druids+1 end
-    if class=="Rogue" then rogues=rogues+1 end
-    if class=="Hunter" then hunters=hunters+1 end
-    if class=="Shaman" then shamans=shamans+1 end
-    if class=="Warrior" then warriors=warriors+1 end
-    if class=="Paladin" then paladins=paladins+1 end
+    if class=="Priest" then priests=priests+1
+    elseif class=="Mage" then mages=mages+1;
+    elseif class=="Warlock" then warlocks=warlocks+1;
+    elseif class=="Druid" then druids=druids+1;
+    elseif class=="Rogue" then rogues=rogues+1;
+    elseif class=="Hunter" then hunters=hunters+1;
+    elseif class=="Shaman" then shamans=shamans+1;
+    elseif class=="Warrior" then warriors=warriors+1;
+    elseif class=="Paladin" then paladins=paladins+1;
+    end
   end
   if CHAT_LOCATION=="print" then
     print("RaidLogger class_composition() \n Raid composition of " .. total_members .. " members consists of: \n  "
@@ -56,12 +53,6 @@ function class_composition(CHAT_LOCATION)
     SendChatMessage("  " .. druids .. " druids, " .. rogues .. " rogues, " .. hunters .. " hunters, ", CHAT_LOCATION);
     SendChatMessage("  " .. warriors .. " warriors, " .. paladins .. " paladins.", CHAT_LOCATION);
   end
-end
-
-function print_raid(classes, delimeter1, delimeter2)
-  csv, members = raid_to_csv(classes, delimeter1, delimeter2)
-  print(members .. " members")
-  print(csv)
 end
 
 function create_dumpframe(text)
@@ -84,23 +75,17 @@ function create_dumpframe(text)
   end)
 end
 
-function raid_export(verbose, extra, classes, delimeter1, delimeter2)
+function raid_export(verbose, delimeter1, delimeter2)
   -- verbose: lets the raid know
-  -- extra: prepends CSV with metadata consisting of zone and date
-  -- classes: appends each line with delimeter2, followed by class
   -- delimeter1: end of line delimeter, usually just "\n"
   -- delimeter2: secondary separator for same-line separation, usually just ","
 
   local zone = GetRealZoneText();
   local date = date("%d/%m/%y %H:%M:%S");
-  csv, members = raid_to_csv(classes, delimeter1, delimeter2);
+  csv, members = raid_to_csv("name" .. delimeter2 .. "class", delimeter1, delimeter2);
 
   if verbose then
     SendChatMessage("RaidLogger: Raid snapshot taken (" .. date .. ", " .. zone .. ", " .. members .. " raid members)", "RAID")
-  end
-  
-  if extra then
-    csv = zone .. delimeter2 .. date .. delimeter1 .. csv
   end
 
   create_dumpframe(csv)
@@ -111,12 +96,12 @@ function buff_check(player, bufflist)
   -- bufflist presets include "onyxia", "diremaul" and "darkmoon"
   -- You can feed an array of your own buffs to check for as well
 
-  onyxia = {"Rallying Cry of the Dragonslayer"}
+  onyxia = {"Rallying Cry of the Dragonslayer"};
   diremaul = {
     "Slip'kik's Savvy",
     "Fengus' Ferocity",
     "Mol'dar's Moxie"
-  }
+  };
   darkmoon = {
     "Sayge's Dark Fortune of Damage",
     "Sayge's Dark Fortune of Resistance",
@@ -130,13 +115,13 @@ function buff_check(player, bufflist)
     "Sayge's Dark Fortune of Intelligence",
     "Sayge's Dark Fortune of Versatility",
     "Sayge's Dark Fortune of Armor"
-  }
+  };
   zulgurub = {
     "Spirit of Zandalar"
-  }
+  };
   songflower = {
     "Songflower Serenade"
-  }
+  };
 
   if tContains({"darkmoon","onyxia","diremaul","songflower","zulgurub"}, bufflist) then
     if bufflist=="darkmoon" then bufflist=darkmoon;
@@ -152,10 +137,11 @@ function buff_check(player, bufflist)
       return true;
     end
   end
+
   return false;
 end
 
-function buff_export_intensity(verbose, mode, delimeter1, delimeter2)
+function buff_export_intensity(verbose, delimeter1, delimeter2)
   -- verbose: lets the raid know
   -- mode: simple (dumps a list of all players with the expected buffs), csv (exports csv)
   -- delimeter1: end of line delimeter, usually just "\n"
@@ -164,7 +150,7 @@ function buff_export_intensity(verbose, mode, delimeter1, delimeter2)
   local date = date("%d/%m/%y %H:%M:%S");
   
   total_members = 0;
-  raid_members={}
+  raid_members = {};
 
   for i=1,GetNumGroupMembers() do
     total_members = total_members + 1;
@@ -176,17 +162,13 @@ function buff_export_intensity(verbose, mode, delimeter1, delimeter2)
     SendChatMessage("RaidLogger: World buff snapshot taken (" .. date .. ", " .. zone .. ", " .. total_members .. " raid members)", "RAID")
   end
 
-  if mode=="csv" then
-    csv = "name" .. delimeter2 .. "onyxia" .. delimeter2 .. "diremaul" .. delimeter2 .. "songflower" .. delimeter2 .. "darkmoon" .. delimeter2 .. "zulgurub"
-    for i=1, getn(raid_members) do
-      csv = csv .. delimeter1 .. raid_members[i] .. delimeter2 .. tostring(buff_check(raid_members[i],"onyxia"))
-                .. delimeter2 .. tostring(buff_check(raid_members[i], "diremaul"))
-                .. delimeter2 .. tostring(buff_check(raid_members[i], "songflower"))
-                .. delimeter2 .. tostring(buff_check(raid_members[i], "darkmoon"))
-                .. delimeter2 .. tostring(buff_check(raid_members[i], "zulgurub"))
-    end
-  else
-    
+  csv = "name" .. delimeter2 .. "onyxia" .. delimeter2 .. "diremaul" .. delimeter2 .. "songflower" .. delimeter2 .. "darkmoon" .. delimeter2 .. "zulgurub"
+  for i=1, getn(raid_members) do
+    csv = csv .. delimeter1 .. raid_members[i] .. delimeter2 .. tostring(buff_check(raid_members[i],"onyxia"))
+              .. delimeter2 .. tostring(buff_check(raid_members[i], "diremaul"))
+              .. delimeter2 .. tostring(buff_check(raid_members[i], "songflower"))
+              .. delimeter2 .. tostring(buff_check(raid_members[i], "darkmoon"))
+              .. delimeter2 .. tostring(buff_check(raid_members[i], "zulgurub"))
   end
 
   create_dumpframe(csv)
