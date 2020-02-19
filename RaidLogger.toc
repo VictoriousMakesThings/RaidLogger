@@ -1,5 +1,5 @@
 ## Interface: 11303
-## Title: RaidToCSV
+## Title: RaidLogger
 ## Author: VictoriousArugal
 ## Version: 1.0
 main.lua
