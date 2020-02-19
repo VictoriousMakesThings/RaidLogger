@@ -1,8 +1,8 @@
-# WoW-RaidToCSV
-RaidToCSV is a simple Classic WoW addon that dumps the raid members into CSV format for easy exportation into spreadsheets and other tools. 
+# RaidLogger
+RaidLogger is a simple Classic WoW addon that dumps the raid members into CSV format for easy exportation into spreadsheets and other tools. It includes additional functions such as raid composition and world buff snapshots.
 
 ## Installation
-Create a RaidToCSV folder in your `World of Warcraft\_classic_\Interface\AddOns` directory. Add `main.lua` and `RaidToCSV.toc` to the folder that you create. After that, restart WoW.
+Create a RaidLogger folder in your `World of Warcraft\_classic_\Interface\AddOns` directory. Add `main.lua` and `RaidLogger.toc` to the folder that you create. After that, restart WoW.
 
 The default way to use it in-game is to use the following, which I suggest setting up a macro for: `/run raid_export(false,true,false,"\n",",")`
 
