@@ -1,15 +1,27 @@
 function raid_to_csv(headers, delimeter1, delimeter2)
-  csv = headers;
+  local csv = "";
+  --csv = headers;
   total_members = 0;
   for i=1,GetNumGroupMembers() do
     total_members = total_members + 1;
     name,a,a,a,class,a,a,a,a,a=GetRaidRosterInfo(i);
-    csv = csv .. delimeter1 .. name .. delimeter2 .. class;
+    csv = csv .. delimeter1 .. name; -- .. delimeter2 .. class;
   end
   return csv, total_members;
 end
 
+function clear_all_officer_notes()
+  online_members,x,a = GetNumGuildMembers()
+  for i=1,online_members do
+    name,rank,rankIndex,level,class,zone,note,officer__note,online=GetGuildRosterInfo(i);
+    if officer__note=="0,0" then
+      GuildRosterSetOfficerNote(i,"")
+    end
+  end
+end
+
 function class_composition(CHAT_LOCATION)
+  -- Add player names, sorted alphabetically? https://wowwiki.fandom.com/wiki/API_sort
   total_members = 0;
   priests = 0;
   mages = 0;
@@ -96,13 +108,13 @@ function buff_check(player, bufflist)
   -- bufflist presets include "onyxia", "diremaul" and "darkmoon"
   -- You can feed an array of your own buffs to check for as well
 
-  onyxia = {"Rallying Cry of the Dragonslayer"};
-  diremaul = {
+  local onyxia = {"Rallying Cry of the Dragonslayer"};
+  local diremaul = {
     "Slip'kik's Savvy",
     "Fengus' Ferocity",
     "Mol'dar's Moxie"
   };
-  darkmoon = {
+  local darkmoon = {
     "Sayge's Dark Fortune of Damage",
     "Sayge's Dark Fortune of Resistance",
     "Sayge's Dark Fortune of Armor",
@@ -116,19 +128,23 @@ function buff_check(player, bufflist)
     "Sayge's Dark Fortune of Versatility",
     "Sayge's Dark Fortune of Armor"
   };
-  zulgurub = {
+  local zulgurub = {
     "Spirit of Zandalar"
   };
-  songflower = {
+  local songflower = {
     "Songflower Serenade"
   };
+  local warchief = {
+    "Warchief's Blessing"
+  };
 
-  if tContains({"darkmoon","onyxia","diremaul","songflower","zulgurub"}, bufflist) then
+  if tContains({"darkmoon","onyxia","diremaul","songflower","zulgurub","warchief"}, bufflist) then
     if bufflist=="darkmoon" then bufflist=darkmoon;
     elseif bufflist=="onyxia" then bufflist=onyxia;
     elseif bufflist=="diremaul" then bufflist=diremaul;
     elseif bufflist=="songflower" then bufflist=songflower;
     elseif bufflist=="zulgurub" then bufflist=zulgurub;
+    elseif bufflist=="warchief" then bufflist=warchief;
     end
   end
 
@@ -159,16 +175,19 @@ function buff_export_intensity(verbose, delimeter1, delimeter2)
   end
 
   if verbose then
-    SendChatMessage("RaidLogger: World buff snapshot taken (" .. date .. ", " .. zone .. ", " .. total_members .. " raid members)", "RAID")
+    SendChatMessage("RaidLogger: Raid snapshot taken (" .. date .. ", " .. zone .. ", " .. total_members .. " raid members)", "RAID")
   end
 
-  csv = "name" .. delimeter2 .. "onyxia" .. delimeter2 .. "diremaul" .. delimeter2 .. "songflower" .. delimeter2 .. "darkmoon" .. delimeter2 .. "zulgurub"
+  local csv = "";
+  --headers
+  --csv = csv .. "name" .. delimeter2 .. "onyxia" .. delimeter2 .. "diremaul" .. delimeter2 .. "songflower" .. delimeter2 .. "darkmoon" .. delimeter2 .. "zulgurub" .. delimeter2 .. "warchief"
   for i=1, getn(raid_members) do
     csv = csv .. delimeter1 .. raid_members[i] .. delimeter2 .. tostring(buff_check(raid_members[i],"onyxia"))
               .. delimeter2 .. tostring(buff_check(raid_members[i], "diremaul"))
               .. delimeter2 .. tostring(buff_check(raid_members[i], "songflower"))
               .. delimeter2 .. tostring(buff_check(raid_members[i], "darkmoon"))
               .. delimeter2 .. tostring(buff_check(raid_members[i], "zulgurub"))
+              .. delimeter2 .. tostring(buff_check(raid_members[i], "warchief"))
   end
 
   create_dumpframe(csv)
