@@ -1,13 +1,17 @@
 function raid_to_csv(headers, delimeter1, delimeter2)
-  local csv = "";
-  --csv = headers;
+  local csv_buff_line = "";
+  --csv_buff_line = headers;
   total_members = 0;
   for i=1,GetNumGroupMembers() do
     total_members = total_members + 1;
     name,a,a,a,class,a,a,a,a,a=GetRaidRosterInfo(i);
-    csv = csv .. delimeter1 .. name; -- .. delimeter2 .. class;
+    if string.len(csv_buff_line) > 0 then
+      csv_buff_line = csv_buff_line .. delimeter1 .. name; -- .. delimeter2 .. class;
+    else
+      csv_buff_line = name;
+    end
   end
-  return csv, total_members;
+  return csv_buff_line, total_members;
 end
 
 function clear_all_officer_notes()
@@ -94,13 +98,13 @@ function raid_export(verbose, delimeter1, delimeter2)
 
   local zone = GetRealZoneText();
   local date = date("%d/%m/%y %H:%M:%S");
-  csv, members = raid_to_csv("name" .. delimeter2 .. "class", delimeter1, delimeter2);
+  csv_buff_line, members = raid_to_csv("name" .. delimeter2 .. "class", delimeter1, delimeter2);
 
   if verbose then
     SendChatMessage("RaidLogger: Raid snapshot taken (" .. date .. ", " .. zone .. ", " .. members .. " raid members)", "RAID")
   end
 
-  create_dumpframe(csv)
+  create_dumpframe(csv_buff_line)
 end
 
 function buff_check(player, bufflist)
@@ -159,7 +163,7 @@ end
 
 function buff_export_intensity(verbose, delimeter1, delimeter2)
   -- verbose: lets the raid know
-  -- mode: simple (dumps a list of all players with the expected buffs), csv (exports csv)
+  -- mode: simple (dumps a list of all players with the expected buffs), csv_buff_line (exports csv_buff_line)
   -- delimeter1: end of line delimeter, usually just "\n"
   -- delimeter2: secondary separator for same-line separation, usually just ","
   local zone = GetRealZoneText();
@@ -169,26 +173,31 @@ function buff_export_intensity(verbose, delimeter1, delimeter2)
   raid_members = {};
 
   for i=1,GetNumGroupMembers() do
-    total_members = total_members + 1;
-    name,a,a,a,class,a,a,a,a,a=GetRaidRosterInfo(i);
+    name,a,a,a,class=GetRaidRosterInfo(i);
     tinsert(raid_members,name)
   end
 
   if verbose then
-    SendChatMessage("RaidLogger: Raid snapshot taken (" .. date .. ", " .. zone .. ", " .. total_members .. " raid members)", "RAID")
+    SendChatMessage("RaidLogger: Raid snapshot taken (" .. date .. ", " .. zone .. ", " .. getn(raid_members) .. " raid members)", "RAID")
   end
 
-  local csv = "";
+  local csv_buff_line = "";
   --headers
-  --csv = csv .. "name" .. delimeter2 .. "onyxia" .. delimeter2 .. "diremaul" .. delimeter2 .. "songflower" .. delimeter2 .. "darkmoon" .. delimeter2 .. "zulgurub" .. delimeter2 .. "warchief"
+  --csv_buff_line = csv_buff_line .. "name" .. delimeter2 .. "onyxia" .. delimeter2 .. "diremaul" .. delimeter2 .. "songflower" .. delimeter2 .. "darkmoon" .. delimeter2 .. "zulgurub" .. delimeter2 .. "warchief"
   for i=1, getn(raid_members) do
-    csv = csv .. delimeter1 .. raid_members[i] .. delimeter2 .. tostring(buff_check(raid_members[i],"onyxia"))
+    local buff_line =  raid_members[i] .. delimeter2 .. tostring(buff_check(raid_members[i],"onyxia"))
               .. delimeter2 .. tostring(buff_check(raid_members[i], "diremaul"))
               .. delimeter2 .. tostring(buff_check(raid_members[i], "songflower"))
               .. delimeter2 .. tostring(buff_check(raid_members[i], "darkmoon"))
               .. delimeter2 .. tostring(buff_check(raid_members[i], "zulgurub"))
               .. delimeter2 .. tostring(buff_check(raid_members[i], "warchief"))
+    
+    if string.len(csv_buff_line) > 0 then
+      csv_buff_line = csv_buff_line .. delimeter1 .. buff_line
+    else
+      csv_buff_line = buff_line
+    end
   end
 
-  create_dumpframe(csv)
+  create_dumpframe(csv_buff_line)
 end
