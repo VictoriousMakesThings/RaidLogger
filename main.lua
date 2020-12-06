@@ -1,77 +1,6 @@
-function raid_to_csv(headers, delimeter1, delimeter2)
-  local csv_buff_line = "";
-  --csv_buff_line = headers;
-  total_members = 0;
-  for i=1,GetNumGroupMembers() do
-    total_members = total_members + 1;
-    name,a,a,a,class,a,a,a,a,a=GetRaidRosterInfo(i);
-    if string.len(csv_buff_line) > 0 then
-      csv_buff_line = csv_buff_line .. delimeter1 .. name; -- .. delimeter2 .. class;
-    else
-      csv_buff_line = name;
-    end
-  end
-  return csv_buff_line, total_members;
-end
-
-function clear_all_officer_notes()
-  online_members,x,a = GetNumGuildMembers()
-  for i=1,online_members do
-    name,rank,rankIndex,level,class,zone,note,officer__note,online=GetGuildRosterInfo(i);
-    if officer__note=="0,0" then
-      GuildRosterSetOfficerNote(i,"")
-    end
-  end
-end
-
-function class_composition(CHAT_LOCATION)
-  -- Add player names, sorted alphabetically? https://wowwiki.fandom.com/wiki/API_sort
-  total_members = 0;
-  priests = 0;
-  mages = 0;
-  warlocks = 0;
-  druids = 0;
-  rogues = 0;
-  hunters = 0;
-  shamans = 0;
-  warriors = 0;
-  paladins = 0;
-
-  for i=1,GetNumGroupMembers() do
-    total_members = total_members + 1;
-    name,a,a,a,class,a,a,a,a,a=GetRaidRosterInfo(i);
-    if class=="Priest" then priests=priests+1
-    elseif class=="Mage" then mages=mages+1;
-    elseif class=="Warlock" then warlocks=warlocks+1;
-    elseif class=="Druid" then druids=druids+1;
-    elseif class=="Rogue" then rogues=rogues+1;
-    elseif class=="Hunter" then hunters=hunters+1;
-    elseif class=="Shaman" then shamans=shamans+1;
-    elseif class=="Warrior" then warriors=warriors+1;
-    elseif class=="Paladin" then paladins=paladins+1;
-    end
-  end
-  if CHAT_LOCATION=="print" then
-    print("RaidLogger class_composition() \n Raid composition of " .. total_members .. " members consists of: \n  "
-           .. priests .. " priests \n  "
-           .. mages .. " mages \n  "
-           .. warlocks .. " warlocks \n  "
-           .. druids .. " druids \n  "
-           .. rogues .. " rogues \n  "
-           .. hunters .. " hunters \n  "
-           .. shamans .. " shamans \n  "
-           .. warriors .. " warriors \n  "
-           .. paladins .. " paladins \n  "
-    );
-  else
-    SendChatMessage("Raid composition of " .. total_members .. " members consists of:", CHAT_LOCATION);
-    SendChatMessage("  " .. priests .. " priests, " .. mages .. " mages, " .. warlocks .. " warlocks, ", CHAT_LOCATION);
-    SendChatMessage("  " .. druids .. " druids, " .. rogues .. " rogues, " .. hunters .. " hunters, ", CHAT_LOCATION);
-    SendChatMessage("  " .. warriors .. " warriors, " .. paladins .. " paladins.", CHAT_LOCATION);
-  end
-end
-
 function create_dumpframe(text)
+  -- Have to do it this way until CopyToClipboard() is no longer a secure function.
+
   local s = CreateFrame("ScrollFrame", nil, UIParent, "UIPanelScrollFrameTemplate")
   s:SetSize(300,200)
   s:SetPoint("CENTER")
@@ -89,22 +18,6 @@ function create_dumpframe(text)
   e:SetScript("OnEscapePressed", function()
     s:Hide()
   end)
-end
-
-function raid_export(verbose, delimeter1, delimeter2)
-  -- verbose: lets the raid know
-  -- delimeter1: end of line delimeter, usually just "\n"
-  -- delimeter2: secondary separator for same-line separation, usually just ","
-
-  local zone = GetRealZoneText();
-  local date = date("%d/%m/%y %H:%M:%S");
-  csv_buff_line, members = raid_to_csv("name" .. delimeter2 .. "class", delimeter1, delimeter2);
-
-  if verbose then
-    SendChatMessage("RaidLogger: Raid snapshot taken (" .. date .. ", " .. zone .. ", " .. members .. " raid members)", "RAID")
-  end
-
-  create_dumpframe(csv_buff_line)
 end
 
 function buff_check(player, bufflist)
@@ -161,20 +74,19 @@ function buff_check(player, bufflist)
   return false;
 end
 
-function buff_export_intensity(verbose, delimeter1, delimeter2)
-  -- verbose: lets the raid know
-  -- mode: simple (dumps a list of all players with the expected buffs), csv_buff_line (exports csv_buff_line)
+function raid_snapshot(verbose, delimeter1, delimeter2)
+  -- verbose: give more information
   -- delimeter1: end of line delimeter, usually just "\n"
   -- delimeter2: secondary separator for same-line separation, usually just ","
   local zone = GetRealZoneText();
   local date = date("%d/%m/%y %H:%M:%S");
   
-  total_members = 0;
-  raid_members = {};
+  local total_members = 0;
+  local raid_members = {};
 
   for i=1,GetNumGroupMembers() do
-    name,a,a,a,class=GetRaidRosterInfo(i);
-    tinsert(raid_members,name)
+    local name,a,a,a,class,a,a,online = GetRaidRosterInfo(i);
+    tinsert(raid_members,{name,class,online})
   end
 
   if verbose then
@@ -182,15 +94,30 @@ function buff_export_intensity(verbose, delimeter1, delimeter2)
   end
 
   local csv_buff_line = "";
-  --headers
-  --csv_buff_line = csv_buff_line .. "name" .. delimeter2 .. "onyxia" .. delimeter2 .. "diremaul" .. delimeter2 .. "songflower" .. delimeter2 .. "darkmoon" .. delimeter2 .. "zulgurub" .. delimeter2 .. "warchief"
+
   for i=1, getn(raid_members) do
-    local buff_line =  raid_members[i] .. delimeter2 .. tostring(buff_check(raid_members[i],"onyxia"))
-              .. delimeter2 .. tostring(buff_check(raid_members[i], "diremaul"))
-              .. delimeter2 .. tostring(buff_check(raid_members[i], "songflower"))
-              .. delimeter2 .. tostring(buff_check(raid_members[i], "darkmoon"))
-              .. delimeter2 .. tostring(buff_check(raid_members[i], "zulgurub"))
-              .. delimeter2 .. tostring(buff_check(raid_members[i], "warchief"))
+    local member = raid_members[i][1]
+    local class = raid_members[i][2]
+    local online = raid_members[i][3]
+    local buff_line = ""
+
+    if online then
+      buff_line =  member .. delimeter2 .. class
+                .. delimeter2 .. tostring(buff_check(member,"onyxia"))
+                .. delimeter2 .. tostring(buff_check(member, "diremaul"))
+                .. delimeter2 .. tostring(buff_check(member, "songflower"))
+                .. delimeter2 .. tostring(buff_check(member, "darkmoon"))
+                .. delimeter2 .. tostring(buff_check(member, "zulgurub"))
+                .. delimeter2 .. tostring(buff_check(member, "warchief"))
+    else
+      buff_line =  member .. delimeter2 .. class
+                .. delimeter2 .. "OFFLINE"
+                .. delimeter2 .. "OFFLINE"
+                .. delimeter2 .. "OFFLINE"
+                .. delimeter2 .. "OFFLINE"
+                .. delimeter2 .. "OFFLINE"
+                .. delimeter2 .. "OFFLINE"
+    end
     
     if string.len(csv_buff_line) > 0 then
       csv_buff_line = csv_buff_line .. delimeter1 .. buff_line
