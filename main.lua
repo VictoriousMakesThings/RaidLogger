@@ -104,11 +104,11 @@ function raid_snapshot(verbose, delimeter1, delimeter2)
     if online then
       buff_line =  member .. delimeter2 .. class
                 .. delimeter2 .. tostring(buff_check(member,"onyxia"))
+                .. delimeter2 .. tostring(buff_check(member, "zulgurub"))
                 .. delimeter2 .. tostring(buff_check(member, "diremaul"))
                 .. delimeter2 .. tostring(buff_check(member, "songflower"))
-                .. delimeter2 .. tostring(buff_check(member, "darkmoon"))
-                .. delimeter2 .. tostring(buff_check(member, "zulgurub"))
                 .. delimeter2 .. tostring(buff_check(member, "warchief"))
+                .. delimeter2 .. tostring(buff_check(member, "darkmoon"))
     else
       buff_line =  member .. delimeter2 .. class
                 .. delimeter2 .. "OFFLINE"
