@@ -10,7 +10,7 @@ After running the above code, a window will pop up which will let you Ctrl-C the
 
 The function signature is as follows:
 ```
-raid_export(verbose, extra, classes, delimeter1, delimeter2)`
+raid_snapshot(verbose, delimeter1, delimeter2)`
   -- verbose: give more information
   -- delimeter1: end of line delimeter, usually just "\n"
   -- delimeter2: secondary separator for same-line separation, usually just ","
