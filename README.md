@@ -16,3 +16,9 @@ raid_snapshot(verbose, delimeter1, delimeter2)`
   -- delimeter2: secondary separator for same-line separation, usually just ","
 ```
 You can change the delimeters to do things such as tab separation if that is more suitable.
+
+## Reading Snapshots
+Everything is separated by the delimeters you set, so you can implement your own choice of reader.
+
+A sample spreadsheet is available at: https://docs.google.com/spreadsheets/d/1bQfpiIFj3J24np1pe7KE0iCr-J6gKfn9hJEBCdCCmT8/
+Create a copy of the spreadsheet, and paste your snapshots into column K. You can optionally delete columns C and D if they're not applicable to you. The bench rows may also be removed.
