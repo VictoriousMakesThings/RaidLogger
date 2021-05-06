@@ -1,3 +1,114 @@
+
+chronoId = GetSpellInfo(349981);
+dummyTooltip = nil;
+function getDummyTooltip()
+  if dummyTooltip ~= nil then
+    return dummyTooltip;
+  end
+
+  dummyTooltip = CreateFrame("GameTooltip", "DummyTooltipRL", nil, "GameTooltipTemplate");
+  dummyTooltip:SetOwner(WorldFrame, "ANCHOR_NONE");
+
+  return dummyTooltip;
+end
+
+function getHiddenBuffTooltip(unit, index, filter)
+  local tooltip = getDummyTooltip();
+  tooltip:ClearLines();
+  tooltip:SetUnitBuff(unit, index, filter);
+
+  local textLine = select(5, tooltip:GetRegions());
+
+  return textLine:GetText();
+end
+
+function getPlayerChronoboonText(unit)
+  local index = nil;
+  
+  for i=1,40 do
+      local name = UnitBuff(unit, i);
+      if name == chronoId then
+          index = i;
+          break;
+      end
+  end
+
+  local inline = "";
+  if index then
+      inline = select(1, getHiddenBuffTooltip(unit,index));
+      inline = string.gsub(inline, "World effects suspended:" ,"");
+  end
+
+  return inline;
+end
+
+function hasDisplacedChronoboon(unit)
+  for i=1,40 do
+    local name = UnitBuff(unit, i);
+    if name == chronoId then
+      return true;
+    end
+  end
+  return false;
+end
+
+function countDisplacedChronoboons()
+  local dChronoPlayers = {};
+  local nonDChronoPlayers = {};
+  local offlinePlayers = {};
+  for i=1,GetNumGroupMembers() do
+    local name,a,a,a,class,a,a,online = GetRaidRosterInfo(i);
+    if online then
+      local hasDispChrono = hasDisplacedChronoboon(name);
+      if hasDispChrono then
+        tinsert(dChronoPlayers, name);
+      else
+        tinsert(nonDChronoPlayers, name);
+      end
+    else
+      tinsert(offlinePlayers, name);
+    end
+  end
+  
+  return dChronoPlayers, nonDChronoPlayers, offlinePlayers;
+end
+
+function chronoStats()
+  local dChronoPlayers, nonDChronoPlayers, offlinePlayers = countDisplacedChronoboons();
+
+  local dChronoPlayerCount = getn(dChronoPlayers);
+  local nonDChronoPlayerCount = getn(nonDChronoPlayers);
+  local offlinePlayerCount = getn(offlinePlayers);
+  local groupSize = GetNumGroupMembers();
+
+  local dChronoPlayerLine = "";
+  for i=1, dChronoPlayerCount do
+    dChronoPlayerLine = dChronoPlayerLine .. dChronoPlayers[i] .. " ";
+  end
+  print("There are currently " .. dChronoPlayerCount .. "/" .. groupSize .. " players in raid |cff00FF00with|r a displaced chronoboon active.")
+  if strlen(dChronoPlayerLine) > 0 then
+    print(dChronoPlayerLine)
+  end
+
+  local nonDChronoPlayerLine = "";
+  for i=1, nonDChronoPlayerCount do
+    nonDChronoPlayerLine = nonDChronoPlayerLine .. nonDChronoPlayers[i] .. " ";
+  end
+  print("There are currently " .. nonDChronoPlayerCount .. "/" .. groupSize .. " players in raid |cffFF0000without|r a displaced chronoboon active.")
+  if strlen(nonDChronoPlayerCount) > 0 then
+    print(nonDChronoPlayerLine)
+  end
+
+  local offlinePlayerLine = "";
+  for i=1, offlinePlayerCount do
+    offlinePlayerLine = offlinePlayerLine .. offlinePlayers[i] .. " ";
+  end
+  print("There are currently " .. offlinePlayerCount .. " players in raid that are |cff5555FFoffline|r and cannot be checked.")
+  if strlen(offlinePlayerCount) > 0 then
+    print(offlinePlayerLine)
+  end
+end
+
 function create_dumpframe(text)
   -- Have to do it this way until CopyToClipboard() is no longer a secure function.
 
@@ -65,7 +176,7 @@ function buff_check(player, bufflist)
     end
   end
 
-  for i=1,40 do local B=UnitBuff(player,i);
+  for i=1,40 do local B,x,x,x,x,D=UnitBuff(player,i);
     if tContains(bufflist, B) then 
       return true;
     end
