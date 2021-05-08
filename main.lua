@@ -146,15 +146,11 @@ function buff_check(player, bufflist)
     "Sayge's Dark Fortune of Damage",
     "Sayge's Dark Fortune of Resistance",
     "Sayge's Dark Fortune of Armor",
-    "Sayge's Dark Fortune of Versatility",
+    "Sayge's Dark Fortune of Spirit",
     "Sayge's Dark Fortune of Intelligence",
-    "Sayge's Dark Fortune of Resistance",
     "Sayge's Dark Fortune of Stamina",
     "Sayge's Dark Fortune of Strength",
-    "Sayge's Dark Fortune of Agility",
-    "Sayge's Dark Fortune of Intelligence",
-    "Sayge's Dark Fortune of Versatility",
-    "Sayge's Dark Fortune of Armor"
+    "Sayge's Dark Fortune of Agility"
   };
   local zulgurub = {
     "Spirit of Zandalar"
