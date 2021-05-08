@@ -201,7 +201,7 @@ function raid_snapshot(verbose, delimeter1, delimeter2)
   end
 
   if verbose then
-    SendChatMessage("RaidLogger: Raid snapshot taken (" .. date .. ", " .. zone .. ", " .. getn(raid_members) .. " raid members)", "RAID")
+    SendChatMessage("Victori Data Utilities: Raid snapshot taken (" .. date .. ", " .. zone .. ", " .. getn(raid_members) .. " raid members)", "RAID")
   end
 
   local csv_buff_line = "";
