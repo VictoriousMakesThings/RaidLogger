@@ -1,4 +1,3 @@
-
 chronoId = GetSpellInfo(349981);
 dummyTooltip = nil;
 function getDummyTooltip()
@@ -115,8 +114,19 @@ function create_dumpframe(text)
   local s = CreateFrame("ScrollFrame", nil, UIParent, "UIPanelScrollFrameTemplate")
   s:SetSize(300,200)
   s:SetPoint("CENTER")
-  s:SetBackdrop({bgFile = "Interface/Tooltips/UI-Tooltip-Background", tile = true, tileSize = 16, insets = {left = 0, right = 0, top = 0, bottom = 0},})
-  s:SetBackdropColor(0, 0, 0)
+
+  -- Support TBC Classic API (v9.0)
+  if not s.SetBackdrop then
+      Mixin(s, BackdropTemplateMixin)
+  end
+  s:SetBackdrop({
+          bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+          tile = true,
+          tileSize = 32,
+          edgeSize = 32,
+          insets = { left = 0, right = 0, top = 0, bottom = 0, },
+  })
+  
   local e = CreateFrame("EditBox", nil, s)
   e:SetMultiLine(true)
   e:SetFontObject(ChatFontNormal)
